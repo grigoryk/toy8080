@@ -6,7 +6,19 @@ pub fn execute(state: &mut State, opcodes: Vec<Opcode>) {
     println!();
     println!("running:");
 
-    // let next = opcodes.get(state.pc);
+    let mut current = opcodes.get(state.pc as usize);
+    loop {
+        state.pc = match current {
+            Some(Opcode::Known(cmd)) => run_cmd(state.pc, cmd, state),
+            Some(Opcode::Unknown(opcode)) => panic!("Unknown opcode: {}", opcode),
+            None => {
+                println!("{:#X} outside of opcodes", state.pc);
+                break
+            }
+        };
+        current = opcodes.get(state.pc as usize);
+    }
+    println!("finished");
 
     // state.sp
 
@@ -20,11 +32,15 @@ pub fn execute(state: &mut State, opcodes: Vec<Opcode>) {
     // }
 }
 
-fn run_op(offset: usize, cmd: &Cmd, state: &mut State) {
-    println!("{:#X} - {}", offset, cmd);
+fn run_cmd(pc: u16, cmd: &Cmd, state: &mut State) -> u16 {
+    println!("{:#X} - {}", pc, cmd);
     match cmd {
-        Cmd::Nop => {},
-        Cmd::Lxi(srp) => lxi(state, srp),
+        Cmd::Nop => pc + 1,
+        Cmd::Lxi(srp) => {
+            lxi(state, srp);
+            pc + 1
+        },
+        Cmd::Jmp(address) => *address,
         _ => panic!("unknown cmd {:?}", cmd)
     }
 }
