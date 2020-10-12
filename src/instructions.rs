@@ -100,7 +100,7 @@ pub enum Cmd {
 }
 
 impl Cmd {
-    pub fn size(&self) -> usize {
+    pub fn size(&self) -> u16 {
         match self {
             Cmd::Nop => 1,
             Cmd::Jmp(_) => 3,

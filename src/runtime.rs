@@ -1,16 +1,23 @@
 use crate::instructions::{Cmd, lxi};
 use crate::state::{State};
-use crate::disassembler::instruction;
+use crate::disassembler::{Opcode};
 
-pub fn execute(state: &mut State) {
+pub fn execute(state: &mut State, opcodes: Vec<Opcode>) {
     println!();
     println!("running:");
-    let mut offset = 0;
-    let op = instruction(&state.memory, offset);
-    match op {
-        Some(cmd) => run_op(offset, &cmd, state),
-        None => panic!("unknown opcode: {:#X}", state.memory[offset])
-    }
+
+    // let next = opcodes.get(state.pc);
+
+    // state.sp
+
+    // loop {
+    // opcodes.iter();
+    // }
+
+    // match op {
+    //     Some(cmd) => run_op(offset, &cmd, state),
+    //     None => panic!("unknown opcode: {:#X}", state.memory[offset])
+    // }
 }
 
 fn run_op(offset: usize, cmd: &Cmd, state: &mut State) {

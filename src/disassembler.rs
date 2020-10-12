@@ -1,15 +1,15 @@
 use std::collections::{HashSet};
 
 use crate::instructions::{Cmd, SetRegisterPair};
-use crate::state::{RegisterPair};
+use crate::state::{RegisterPair, Memory};
 
-pub fn instruction(memory: &Vec<u8>, at: usize) -> Option<Cmd> {
-    let w = memory.get(at).expect("bad address");
+pub fn instruction(memory: Memory, at: u16) -> Option<Cmd> {
+    let w = memory.get(at as usize).expect("bad address");
     match format!("{:#X}", w).as_str() {
         "0x0" => Some(Cmd::Nop),
-        "0x1" => Some(Cmd::Lxi(SetRegisterPair::BC(memory[at + 2], memory[at + 1]))),
-        "0x11" => Some(Cmd::Lxi(SetRegisterPair::DE(memory[at + 2], memory[at + 1]))),
-        "0x21" => Some(Cmd::Lxi(SetRegisterPair::HL(memory[at + 2], memory[at + 1]))),
+        "0x1" => Some(Cmd::Lxi(SetRegisterPair::BC(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
+        "0x11" => Some(Cmd::Lxi(SetRegisterPair::DE(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
+        "0x21" => Some(Cmd::Lxi(SetRegisterPair::HL(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
         "0x31" => Some(Cmd::Lxi(SetRegisterPair::SP(address_at(memory, at)))),
         "0xC3" => Some(Cmd::Jmp(address_at(memory, at))),
         "0xC5" => Some(Cmd::Push(RegisterPair::BC)),
@@ -20,35 +20,47 @@ pub fn instruction(memory: &Vec<u8>, at: usize) -> Option<Cmd> {
     }
 }
 
-fn address_at(memory: &Vec<u8>, offset: usize) -> u16 {
-    (memory[offset + 2] as u16) << 8 | memory[offset + 1] as u16
+fn address_at(memory: Memory, offset: u16) -> u16 {
+    (memory[(offset + 2) as usize] as u16) << 8 | memory[(offset + 1) as usize] as u16
 }
 
-pub fn disassemble(memory: &Vec<u8>) {
+pub enum Opcode {
+    Known(Cmd),
+    Unknown(String)
+}
+
+pub fn disassemble(memory: Memory, max_address: u16) -> Vec<Opcode> {
     let mut offset = 0;
     let mut known_ops = 0;
     let mut total_ops = 0;
 
+    let mut res = Vec::new();
     let mut missing_opcodes_set = HashSet::new();
 
-    while offset < memory.len() {
+    while offset <= max_address {
         let op = instruction(memory, offset);
-        let skip_by = match &op {
+        match &op {
             Some(cmd) => {
                 println!("{:#X} - {}", offset, cmd);
-                cmd.size()
-            },
-            None => {
-                println!("{:#X} - ?? - {:#X}", offset, memory[offset]);
-                1
+                res.push(Opcode::Known(cmd.clone()));
             }
+            None => {
+                let opcode = format!("{:#X}", memory[offset as usize]);
+                println!("{:#X} - ?? - {}", offset, opcode);
+                res.push(Opcode::Unknown(opcode));
+            }
+        }
+
+        let skip_by = match &op {
+            Some(cmd) => cmd.size(),
+            None => 1
         };
 
         total_ops += 1;
         if op.is_some() {
             known_ops += 1;
         } else {
-            missing_opcodes_set.insert(format!("{:#X}", memory[offset]));
+            missing_opcodes_set.insert(format!("{:#X}", memory[offset as usize]));
         }
 
         offset += skip_by;
@@ -61,4 +73,6 @@ pub fn disassemble(memory: &Vec<u8>) {
     missing_opcodes_vec.sort();
 
     println!("missing opcodes ({}): {:?}", missing_opcodes_set.len(), missing_opcodes_vec);
+
+    res
 }

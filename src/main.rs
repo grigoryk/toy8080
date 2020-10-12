@@ -5,12 +5,8 @@ mod state;
 use state::{State, Registers, Flags};
 
 mod instructions;
-
 mod disassembler;
-use disassembler::disassemble;
-
 mod runtime;
-use runtime::execute;
 
 fn main() {
     let mut state = State {
@@ -22,7 +18,7 @@ fn main() {
         },
         sp: 0,
         pc: 0,
-        memory: Vec::new()
+        memory: [0; u16::MAX as usize]
     };
 
     let args: Vec<String> = env::args().collect();
@@ -30,8 +26,16 @@ fn main() {
     println!("reading file: {:?}", hfile);
     println!("");
 
-    state.memory = fs::read(hfile).expect("Couldn't read the file");
-    disassemble(&state.memory);
+    let file = fs::read(hfile).expect("Couldn't read the file");
+    let mut current_address: u16 = 0;
+    for byte in file {
+        state.memory[current_address as usize] = byte;
+        current_address += 1;
+        if current_address > u16::MAX {
+            panic!("memory overflow while reading file");
+        }
+    }
+    let opcodes = disassembler::disassemble(state.memory, current_address);
 
-    // execute(&mut state);
+    runtime::execute(&mut state, opcodes);
 }

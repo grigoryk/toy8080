@@ -26,10 +26,12 @@ pub struct Registers {
     pub l: u8
 }
 
+pub type Memory = [u8; u16::MAX as usize];
+
 pub struct State {
     pub registers: Registers,
     pub sp: u16, // stack pointer
     pub pc: u16, // program counter
     pub flags: Flags,
-    pub memory: Vec<u8>
+    pub memory: Memory
 }
