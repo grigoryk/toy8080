@@ -1,5 +1,7 @@
 use std::env;
-use std::fs;
+use std::convert::TryFrom;
+use std::fs::File;
+use std::io::prelude::*;
 
 mod state;
 use state::{State, Registers, Flags};
@@ -25,17 +27,12 @@ fn main() {
     let hfile = &args[1];
     println!("reading file: {:?}", hfile);
     println!("");
-
-    let file = fs::read(hfile).expect("Couldn't read the file");
-    let mut current_address: u16 = 0;
-    for byte in file {
-        state.memory[current_address as usize] = byte;
-        current_address += 1;
-        if current_address > u16::MAX {
-            panic!("memory overflow while reading file");
-        }
-    }
-    let opcodes = disassembler::disassemble(state.memory, current_address);
+    let mut file = File::open(hfile).expect("Couldn't open the file");
+    let fsize = match file.read(&mut state.memory[..]) {
+        Ok(size) => size,
+        Err(_) => panic!("Couldn't read file")
+    };
+    let opcodes = disassembler::disassemble(state.memory, u16::try_from(fsize).expect("file too large"));
 
     runtime::execute(&mut state, opcodes);
 }
