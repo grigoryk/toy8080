@@ -5,7 +5,7 @@ pub enum Register {
 
 #[derive(Clone, Debug)]
 pub enum RegisterPair {
-    BC, DE, HL, AF // AF is A, Flags
+    B, D, H, PSW // PSW - Program Status Word, refers to A and flags
 }
 
 pub struct Flags {
@@ -17,13 +17,13 @@ pub struct Flags {
 }
 
 pub struct Registers {
-    pub a: u8,
     pub b: u8,
     pub c: u8,
     pub d: u8,
     pub e: u8,
     pub h: u8,
-    pub l: u8
+    pub l: u8,
+    pub a: u8, // accumulator
 }
 
 pub type Memory = [u8; u16::MAX as usize];

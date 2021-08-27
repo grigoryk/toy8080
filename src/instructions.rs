@@ -3,19 +3,19 @@ use crate::state::{State, RegisterPair};
 
 #[derive(Clone, Debug)]
 pub enum SetRegisterPair {
-    BC(u8, u8),
-    DE(u8, u8),
-    HL(u8, u8),
-    SP(u16)
+    B(u8, u8),
+    D(u8, u8),
+    H(u8, u8),
+    PSW(u16) // Program Status Word
 }
 
 impl fmt::Display for SetRegisterPair {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            SetRegisterPair::BC(b1, b2) => write!(f, "B={:#X}, C={:#X}", b1, b2),
-            SetRegisterPair::DE(b1, b2) => write!(f, "D={:#X}, E={:#X}", b1, b2),
-            SetRegisterPair::HL(b1, b2) => write!(f, "H={:#X}, L={:#X}", b1, b2),
-            SetRegisterPair::SP(a) => write!(f, "SP={:#X}", a),
+            SetRegisterPair::B(b1, b2) => write!(f, "B={:#X}, C={:#X}", b1, b2),
+            SetRegisterPair::D(b1, b2) => write!(f, "D={:#X}, E={:#X}", b1, b2),
+            SetRegisterPair::H(b1, b2) => write!(f, "H={:#X}, L={:#X}", b1, b2),
+            SetRegisterPair::PSW(a) => write!(f, "SP={:#X}", a),
         }
     }
 }
@@ -121,19 +121,19 @@ impl fmt::Display for Cmd {
 
 pub fn lxi(state: &mut State, srp: &SetRegisterPair) {
     match srp {
-        SetRegisterPair::BC(b1, b2) => {
+        SetRegisterPair::B(b1, b2) => {
             state.registers.b = *b1;
             state.registers.c = *b2;
         },
-        SetRegisterPair::DE(b1, b2) => {
+        SetRegisterPair::D(b1, b2) => {
             state.registers.d = *b1;
             state.registers.e = *b2;
         },
-        SetRegisterPair::HL(b1, b2) => {
+        SetRegisterPair::H(b1, b2) => {
             state.registers.h = *b1;
             state.registers.l = *b2;
         },
-        SetRegisterPair::SP(a) => {
+        SetRegisterPair::PSW(a) => {
             state.sp = *a
         }
     }

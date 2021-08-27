@@ -7,15 +7,15 @@ pub fn instruction(memory: Memory, at: u16) -> Option<Cmd> {
     let w = memory.get(at as usize).expect("bad address");
     match format!("{:#X}", w).as_str() {
         "0x0" => Some(Cmd::Nop),
-        "0x1" => Some(Cmd::Lxi(SetRegisterPair::BC(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
-        "0x11" => Some(Cmd::Lxi(SetRegisterPair::DE(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
-        "0x21" => Some(Cmd::Lxi(SetRegisterPair::HL(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
-        "0x31" => Some(Cmd::Lxi(SetRegisterPair::SP(address_at(memory, at)))),
+        "0x1" => Some(Cmd::Lxi(SetRegisterPair::B(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
+        "0x11" => Some(Cmd::Lxi(SetRegisterPair::D(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
+        "0x21" => Some(Cmd::Lxi(SetRegisterPair::H(memory[(at + 2) as usize], memory[(at + 1) as usize]))),
+        "0x31" => Some(Cmd::Lxi(SetRegisterPair::PSW(address_at(memory, at)))),
         "0xC3" => Some(Cmd::Jmp(address_at(memory, at))),
-        "0xC5" => Some(Cmd::Push(RegisterPair::BC)),
-        "0xD5" => Some(Cmd::Push(RegisterPair::DE)),
-        "0xE5" => Some(Cmd::Push(RegisterPair::HL)),
-        "0xF5" => Some(Cmd::Push(RegisterPair::AF)),
+        "0xC5" => Some(Cmd::Push(RegisterPair::B)),
+        "0xD5" => Some(Cmd::Push(RegisterPair::D)),
+        "0xE5" => Some(Cmd::Push(RegisterPair::H)),
+        "0xF5" => Some(Cmd::Push(RegisterPair::PSW)),
         _ => None
     }
 }
