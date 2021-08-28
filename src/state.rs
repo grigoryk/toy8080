@@ -26,7 +26,7 @@ pub struct Registers {
     pub a: u8, // accumulator
 }
 
-pub type Memory = [u8; u16::MAX as usize];
+pub type Memory = [u8; u16::MAX as usize]; // 65536 bytes, 64kb, 16 bit addressing
 
 pub struct State {
     pub registers: Registers,
